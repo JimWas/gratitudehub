@@ -9,8 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "remix:build": "remix vite:build", // Note: Renamed to avoid conflict with existing "build"
-    "remix:dev": "remix vite:dev",     // Note: Renamed to avoid conflict with existing "dev"
+    "remix:build": "remix vite:build",
+    "remix:dev": "remix vite:dev",
     "start": "netlify serve"
   },
   "dependencies": {
