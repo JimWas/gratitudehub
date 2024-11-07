@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "remix:build": "remix vite:build", // Note: Renamed to avoid conflict with existing "build"
+    "remix:dev": "remix vite:dev",     // Note: Renamed to avoid conflict with existing "dev"
+    "start": "netlify serve"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
