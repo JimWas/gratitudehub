@@ -2,6 +2,8 @@ import React from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../services/api';
 import {
   Table,
   TableBody,
@@ -13,36 +15,52 @@ import {
 
 const Admin = () => {
   const { toast } = useToast();
-  const [messages, setMessages] = React.useState([
-    {
-      id: "1",
-      text: "To the kind stranger who helped me change my tire...",
-      status: "pending",
-      reportCount: 0,
-      createdAt: "2024-02-14 15:30",
-    },
-    // Add more mock data as needed
-  ]);
+  const queryClient = useQueryClient();
+
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['messages'],
+    queryFn: api.getMessages
+  });
+
+  const updateMessageMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => 
+      api.updateMessageStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    }
+  });
 
   const handleApprove = (id: string) => {
-    setMessages(messages.map(msg => 
-      msg.id === id ? { ...msg, status: 'approved' } : msg
-    ));
-    toast({
-      title: "Message Approved",
-      description: "The message has been approved and is now visible.",
-    });
+    updateMessageMutation.mutate(
+      { id, status: 'approved' },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Message Approved",
+            description: "The message has been approved and is now visible.",
+          });
+        }
+      }
+    );
   };
 
   const handleReject = (id: string) => {
-    setMessages(messages.map(msg => 
-      msg.id === id ? { ...msg, status: 'rejected' } : msg
-    ));
-    toast({
-      title: "Message Rejected",
-      description: "The message has been rejected and hidden from view.",
-    });
+    updateMessageMutation.mutate(
+      { id, status: 'rejected' },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Message Rejected",
+            description: "The message has been rejected and hidden from view.",
+          });
+        }
+      }
+    );
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -61,13 +79,13 @@ const Admin = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {messages.map((message) => (
+            {messages.map((message: any) => (
               <TableRow key={message.id}>
                 <TableCell className="max-w-md truncate">
                   {message.text}
                 </TableCell>
-                <TableCell>{message.createdAt}</TableCell>
-                <TableCell>{message.reportCount}</TableCell>
+                <TableCell>{message.created_at}</TableCell>
+                <TableCell>{message.report_count}</TableCell>
                 <TableCell>{message.status}</TableCell>
                 <TableCell className="space-x-2">
                   <Button
